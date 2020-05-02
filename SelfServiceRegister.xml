@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+chan PaymentAccepted, CardPaymentSelected
+
+int ErrCardStat = 0;
+
+clock SysTimer;</declaration>
+	<template>
+		<name x="5" y="5">Card Payment</name>
+		<declaration>// Place local declarations here.
+
+
+clock PinTimer;</declaration>
+		<location id="id0" x="94" y="68">
+			<name x="84" y="34">Payment Cancelled</name>
+		</location>
+		<location id="id1" x="102" y="-221">
+			<name x="43" y="-255">Payment Succesful</name>
+		</location>
+		<location id="id2" x="102" y="-51">
+			<name x="41" y="-34">Pin Code Accepted</name>
+		</location>
+		<location id="id3" x="-187" y="68">
+			<name x="-238" y="85">Pin Code Rejected</name>
+		</location>
+		<location id="id4" x="-187" y="-51">
+			<name x="-246" y="-85">Pin Code Recieved</name>
+		</location>
+		<location id="id5" x="-442" y="-52">
+			<name x="-484" y="-34">Card Inserted</name>
+		</location>
+		<location id="id6" x="-442" y="-221">
+			<name x="-459" y="-255">Idle</name>
+		</location>
+		<init ref="id6"/>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-399" y="17">ErrCardStat &lt; 3</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-85" y="76">ErrCardStat &gt;= 3</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id6"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="110" y="-136">PaymentAccepted!</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id2"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="assignment" x="-178" y="0">ErrCardStat++</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-357" y="-51">PinTimer &gt; 200</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-433" y="-136">CardPaymentSelected?</label>
+			<label kind="assignment" x="-433" y="-153">PinTimer := 0</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+Process = Template();
+// List one or more processes to be composed into a system.
+system Process;
+    </system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
