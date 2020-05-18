@@ -92,6 +92,7 @@ clock SysTimer;</declaration>
 			<nail x="255" y="178"/>
 			<nail x="383" y="178"/>
 			<nail x="383" y="-289"/>
+			<nail x="-340" y="-289"/>
 		</transition>
 		<transition>
 			<source ref="id3"/>
@@ -144,12 +145,13 @@ clock SysTimer;</declaration>
 			<committed/>
 		</location>
 		<location id="id14" x="-2643" y="-102">
-			<name x="-2626" y="-110">PayementError</name>
+			<name x="-2626" y="-110">PaymentError</name>
 		</location>
 		<location id="id15" x="-2652" y="238">
 			<name x="-2643" y="212">PaymentIsAccepted</name>
 		</location>
 		<location id="id16" x="-3153" y="68">
+			<name x="-3221" y="85">PaymentChosen</name>
 		</location>
 		<location id="id17" x="-3833" y="170">
 			<name x="-3918" y="161">AgeError</name>
@@ -785,35 +787,67 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 		</query>
 		<query>
 			<formula>A[] not deadlock</formula>
+			<comment>There should be no deadlocks in the system</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; ((HS.ItemIsScanned || AS.ItemIsScanned) imply Con.CashPayment) imply Con.PaymentIsAccepted</formula>
+			<comment>When an item is scanned you should be able to pay in cash 
+</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; ((HS.ItemIsScanned || AS.ItemIsScanned) imply Con.CardPayment) imply Con.PaymentIsAccepted</formula>
+			<comment>When an item is scanned you should be able to pay with card</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; ((HS.ItemIsScanned || AS.ItemIsScanned) imply Con.CouponPayment) imply Con.PaymentIsAccepted</formula>
+			<comment>When an item is scanned you should be able to pay with coupons</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (Int.ScannedItem imply Int.ScannedItem)</formula>
+			<comment>You should be able to scan two items after one another
+</comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Con.PaymentChosen and not (HS.ItemIsScanned || AS.ItemIsScanned)</formula>
+			<comment>You should not be able to scan an item if you are paying</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Con.BackPayment imply (RP.ReceiptPrinted and BackP.Succes)</formula>
+			<comment>If you have overpaid you should get payment back and a receipt</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Con.PaymentChosen imply (ErrStat == 0 &amp;&amp; W.Error)</formula>
+			<comment>If weight is not OK you should not be able to pay
+</comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; W.Error imply EL.Red</formula>
+			<comment>If unrecognized weight the error lamp should be on</comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Con.PaymentError imply EL.Red</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment></comment>
+			<formula>A&lt;&gt; EL.Red imply EL.Green</formula>
+			<comment>If Error lamp is on the interactive screen should be reset </comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment></comment>
+			<formula>A&lt;&gt; ((Con.ItemIsScanned imply W.Error) not imply Con.ItemIsScanned)</formula>
+			<comment>It should not be possible to scan a new item if the weight returns an error
+</comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment></comment>
+			<formula>A&lt;&gt; Con.CardPayment imply (not Con.CashPayment and not Con.CouponPayment)</formula>
+			<comment>While a card payment is happening, another payment of cash/coupon is not possible</comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment></comment>
+			<formula>A&lt;&gt; ErrStat &gt; 0 imply (EL.Red and (HS.Idle and AS.Idle))</formula>
+			<comment>If an error occurs, the shopper should not be able to continue before a reset has happened</comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
+			<formula>A&lt;&gt; (Con.AgeVerification imply EL.Red) imply EL.Green</formula>
+			<comment>If scanning an age restricted item the age error should be present and in need of a reset</comment>
 		</query>
 		<query>
 			<formula></formula>
