@@ -96,31 +96,11 @@ A<> (Con.AgeVerification imply EL.Red) imply EL.Green
 //NO_QUERY
 
 /*
-
+If card is inserted and the PayTimer is above or equal to 10000 the transaction should be failed
 */
-CardP.CardInserted and CardP.CardPayTimer > 10000 --> CardP.PaymentFailed
+A<> (CardP.CardInserted and CardP.CardPayTimer >= 10000) imply CardP.PaymentFailed
 
 /*
-
+If and item is scanned but not placed on the weight within 5 seconds, the errorlamp should register and show red
 */
-//NO_QUERY
-
-/*
-
-*/
-//NO_QUERY
-
-/*
-
-*/
-//NO_QUERY
-
-/*
-
-*/
-//NO_QUERY
-
-/*
-
-*/
-//NO_QUERY
+A<> (Con.ItemIsScanned && Con.ItemPlacedTimer >= 5000) imply EL.Red

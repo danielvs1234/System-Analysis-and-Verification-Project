@@ -30,7 +30,7 @@ chan StartShopping, StopShopping, ChoosePayment, PaymentComplete, PaymentDenied;
 int ErrCardStat = 0;
 int ErrStat = 0;
 
-clock SysTimer;</declaration>
+clock SysTimer, ActivityTimer, ErrorResponseTimer;</declaration>
 	<template>
 		<name>Interface</name>
 		<location id="id0" x="-204" y="-34">
@@ -123,7 +123,7 @@ clock SysTimer;</declaration>
 	</template>
 	<template>
 		<name>Controller</name>
-		<declaration>clock TimeSinceSuccessfulScan;</declaration>
+		<declaration>clock TimeSinceLastAction, ItemPlacedTimer;</declaration>
 		<location id="id8" x="-2643" y="-204">
 			<name x="-2652" y="-238">PaymentIsDeclined</name>
 			<committed/>
@@ -152,8 +152,8 @@ clock SysTimer;</declaration>
 			<name x="-2643" y="212">PaymentIsAccepted</name>
 		</location>
 		<location id="id16" x="-3153" y="68">
-			<name x="-3221" y="85">PaymentChosen</name>
-			<label kind="invariant" x="-3332" y="25">TimeSinceSuccessfulScan &lt; 1000</label>
+			<name x="-3230" y="25">PaymentChosen</name>
+			<label kind="invariant" x="-3340" y="102">TimeSinceLastAction &lt; 1000</label>
 		</location>
 		<location id="id17" x="-3833" y="170">
 			<name x="-3918" y="161">AgeError</name>
@@ -167,7 +167,7 @@ clock SysTimer;</declaration>
 		<location id="id20" x="-3289" y="272">
 		</location>
 		<location id="id21" x="-3527" y="170">
-			<name x="-3536" y="179">ItemIsScanned</name>
+			<name x="-3536" y="178">ItemIsScanned</name>
 			<committed/>
 		</location>
 		<location id="id22" x="-3425" y="68">
@@ -187,16 +187,27 @@ clock SysTimer;</declaration>
 		</location>
 		<init ref="id23"/>
 		<transition>
+			<source ref="id21"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-3561" y="399">ItemPlacedTimer &gt;= 5000</label>
+			<label kind="assignment" x="-3561" y="416">ErrStat := 404,
+ErrorResponseTimer := 0</label>
+			<nail x="-3757" y="195"/>
+			<nail x="-3757" y="399"/>
+			<nail x="-3230" y="399"/>
+			<nail x="-3230" y="272"/>
+		</transition>
+		<transition>
 			<source ref="id19"/>
 			<target ref="id22"/>
-			<label kind="synchronisation" x="-3587" y="255">WeightOk?</label>
-			<label kind="assignment" x="-3587" y="272">TimeSinceSuccessfulScan := 0</label>
+			<label kind="synchronisation" x="-3587" y="289">WeightOk?</label>
+			<label kind="assignment" x="-3587" y="272">TimeSinceLastAction := 0</label>
 			<nail x="-3425" y="272"/>
 		</transition>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id22"/>
-			<label kind="assignment" x="-3366" y="-93">TimeSinceSuccessfulScan := 0</label>
+			<label kind="assignment" x="-3357" y="-68">TimeSinceLastAction := 0</label>
 		</transition>
 		<transition>
 			<source ref="id8"/>
@@ -292,7 +303,7 @@ clock SysTimer;</declaration>
 		<transition>
 			<source ref="id22"/>
 			<target ref="id16"/>
-			<label kind="synchronisation" x="-3340" y="68">ChoosePayment?</label>
+			<label kind="synchronisation" x="-3340" y="85">ChoosePayment?</label>
 		</transition>
 		<transition>
 			<source ref="id17"/>
@@ -302,7 +313,8 @@ clock SysTimer;</declaration>
 		<transition>
 			<source ref="id18"/>
 			<target ref="id17"/>
-			<label kind="assignment" x="-3824" y="110">ErrStat :=18</label>
+			<label kind="assignment" x="-3825" y="93">ErrStat :=18,
+ErrorResponseTimer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id22"/>
@@ -319,17 +331,19 @@ clock SysTimer;</declaration>
 		<transition>
 			<source ref="id21"/>
 			<target ref="id19"/>
+			<label kind="guard" x="-3723" y="204">ItemPlacedTimer &lt; 5000</label>
 		</transition>
 		<transition>
 			<source ref="id20"/>
 			<target ref="id22"/>
 			<label kind="synchronisation" x="-3391" y="195">Reset?</label>
-			<label kind="assignment" x="-3332" y="187">TimeSinceSuccessfulScan := 0</label>
+			<label kind="assignment" x="-3332" y="187">TimeSinceLastAction := 0</label>
 		</transition>
 		<transition>
 			<source ref="id22"/>
 			<target ref="id21"/>
-			<label kind="synchronisation" x="-3569" y="102">ItemScanned?</label>
+			<label kind="synchronisation" x="-3629" y="102">ItemScanned?</label>
+			<label kind="assignment" x="-3629" y="119">ItemPlacedTimer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id23"/>
@@ -372,8 +386,9 @@ clock CardPayTimer;</declaration>
 			<source ref="id33"/>
 			<target ref="id27"/>
 			<label kind="guard" x="-297" y="272">CardPayTimer &gt;= 10000</label>
-			<label kind="synchronisation" x="-297" y="306">PaymentDeclined!</label>
-			<label kind="assignment" x="-297" y="289">ErrStat:=24</label>
+			<label kind="synchronisation" x="-297" y="323">PaymentDeclined!</label>
+			<label kind="assignment" x="-297" y="289">ErrStat:=24,
+ErrorResponseTimer := 0</label>
 			<nail x="-544" y="272"/>
 			<nail x="187" y="272"/>
 		</transition>
@@ -381,8 +396,9 @@ clock CardPayTimer;</declaration>
 			<source ref="id32"/>
 			<target ref="id27"/>
 			<label kind="guard" x="-136" y="195">CardPayTimer &gt;= 10000</label>
-			<label kind="synchronisation" x="-136" y="229">PaymentDeclined!</label>
-			<label kind="assignment" x="-136" y="212">ErrStat:=24</label>
+			<label kind="synchronisation" x="-136" y="212">PaymentDeclined!</label>
+			<label kind="assignment" x="-136" y="229">ErrStat:=24,
+ErrorResponseTimer := 0</label>
 			<nail x="-289" y="195"/>
 			<nail x="170" y="195"/>
 		</transition>
@@ -397,15 +413,17 @@ clock CardPayTimer;</declaration>
 		<transition>
 			<source ref="id30"/>
 			<target ref="id27"/>
-			<label kind="synchronisation" x="93" y="25">PaymentDeclined!</label>
-			<label kind="assignment" x="93" y="42">ErrStat:=25</label>
+			<label kind="synchronisation" x="93" y="8">PaymentDeclined!</label>
+			<label kind="assignment" x="93" y="25">ErrStat:=25,
+ErrorResponseTimer := 0</label>
 			<nail x="170" y="0"/>
 		</transition>
 		<transition>
 			<source ref="id28"/>
 			<target ref="id27"/>
-			<label kind="synchronisation" x="25" y="85">PaymentDeclined!</label>
-			<label kind="assignment" x="42" y="102">ErrStat:=25</label>
+			<label kind="synchronisation" x="17" y="59">PaymentDeclined!</label>
+			<label kind="assignment" x="17" y="76">ErrStat:=25,
+ErrorResponseTimer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id31"/>
@@ -448,7 +466,7 @@ CardPayTimer &lt; 10000</label>
 		<transition>
 			<source ref="id34"/>
 			<target ref="id33"/>
-			<label kind="synchronisation" x="-535" y="-59">CardPaymentSelected?</label>
+			<label kind="synchronisation" x="-535" y="-85">CardPaymentSelected?</label>
 			<label kind="assignment" x="-535" y="-102">CardPayTimer := 0</label>
 		</transition>
 	</template>
@@ -484,7 +502,8 @@ CardPayTimer &lt; 10000</label>
 			<source ref="id37"/>
 			<target ref="id35"/>
 			<label kind="synchronisation" x="-1411" y="-315">PaymentDeclined!</label>
-			<label kind="assignment" x="-1411" y="-297">ErrStat := 69</label>
+			<label kind="assignment" x="-1411" y="-297">ErrStat := 69,
+ErrorResponseTimer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id37"/>
@@ -529,7 +548,8 @@ CardPayTimer &lt; 10000</label>
 			<source ref="id41"/>
 			<target ref="id39"/>
 			<label kind="synchronisation" x="-705" y="-110">PaymentDeclined!</label>
-			<label kind="assignment" x="-705" y="-93">ErrStat := 2314</label>
+			<label kind="assignment" x="-705" y="-93">ErrStat := 2314,
+ErrorResponseTimer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id41"/>
@@ -577,7 +597,8 @@ CardPayTimer &lt; 10000</label>
 			<source ref="id45"/>
 			<target ref="id44"/>
 			<label kind="synchronisation" x="-238" y="0">ReturnCashFailed!</label>
-			<label kind="assignment" x="-238" y="17">ErrStat := 1</label>
+			<label kind="assignment" x="-238" y="17">ErrStat := 1,
+ErrorResponseTimer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id46"/>
@@ -632,8 +653,9 @@ CardPayTimer &lt; 10000</label>
 		<transition>
 			<source ref="id50"/>
 			<target ref="id49"/>
-			<label kind="synchronisation" x="-263" y="85">UnrecognizedWeight!</label>
-			<label kind="assignment" x="-238" y="102">ErrStat := 1</label>
+			<label kind="synchronisation" x="-238" y="85">UnrecognizedWeight!</label>
+			<label kind="assignment" x="-238" y="102">ErrStat := 1,
+ErrorResponseTimer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id51"/>
@@ -648,10 +670,19 @@ CardPayTimer &lt; 10000</label>
 		<location id="id52" x="-340" y="-136">
 			<name x="-348" y="-170">Red</name>
 		</location>
-		<location id="id53" x="-544" y="-272">
-			<name x="-561" y="-306">Green</name>
+		<location id="id53" x="-544" y="-280">
+			<name x="-612" y="-289">Green</name>
 		</location>
 		<init ref="id53"/>
+		<transition>
+			<source ref="id53"/>
+			<target ref="id53"/>
+			<label kind="guard" x="-561" y="-459">ErrorResponseTimer &gt;= 1000</label>
+			<label kind="synchronisation" x="-561" y="-442">Reset!</label>
+			<label kind="assignment" x="-561" y="-476">ErrorResponseTimer := 0</label>
+			<nail x="-476" y="-391"/>
+			<nail x="-620" y="-391"/>
+		</transition>
 		<transition>
 			<source ref="id52"/>
 			<target ref="id53"/>
@@ -663,7 +694,8 @@ CardPayTimer &lt; 10000</label>
 		<transition>
 			<source ref="id53"/>
 			<target ref="id52"/>
-			<label kind="guard" x="-442" y="-246">ErrStat &gt; 0</label>
+			<label kind="guard" x="-442" y="-263">ErrStat &gt; 0 &amp;&amp; 
+ErrorResponseTimer &lt; 1000</label>
 			<label kind="assignment" x="-442" y="-229">ErrorTimer := 0</label>
 		</transition>
 	</template>
@@ -873,28 +905,12 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>(CardP.CardInserted and CardP.CardPayTimer &gt;= 10000) --&gt; CardP.PaymentFailed</formula>
-			<comment></comment>
+			<formula>A&lt;&gt; (CardP.CardInserted and CardP.CardPayTimer &gt;= 10000) imply CardP.PaymentFailed</formula>
+			<comment>If card is inserted and the PayTimer is above or equal to 10000 the transaction should be failed</comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
+			<formula>A&lt;&gt; (Con.ItemIsScanned &amp;&amp; Con.ItemPlacedTimer &gt;= 5000) imply EL.Red</formula>
+			<comment>If and item is scanned but not placed on the weight within 5 seconds, the errorlamp should register and show red</comment>
 		</query>
 	</queries>
 </nta>
