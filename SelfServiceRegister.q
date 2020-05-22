@@ -40,7 +40,8 @@ E<> (Int.ScannedItem imply Int.ScannedItem)
 /*
 You should not be able to scan an item if you are paying
 */
-A<> Con.PaymentChosen and not (HS.ItemIsScanned || AS.ItemIsScanned)
+E<> Con.PaymentChosen and not (HS.ItemIsScanned || AS.ItemIsScanned)\
+
 
 /*
 If you have overpaid you should get payment back and a receipt
@@ -72,7 +73,7 @@ A<> EL.Red imply EL.Green
 It should not be possible to scan a new item if the weight returns an error
 
 */
-A<> ((Con.ItemIsScanned imply W.Error) not imply Con.ItemIsScanned)
+A<> ((Con.ItemIsScanned imply W.Error) imply not Con.ItemIsScanned)
 
 /*
 While a card payment is happening, another payment of cash\/coupon is not possible
