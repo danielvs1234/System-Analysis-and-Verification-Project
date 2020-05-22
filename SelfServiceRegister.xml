@@ -196,6 +196,7 @@ clock SysTimer;</declaration>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id22"/>
+			<label kind="assignment" x="-3366" y="-93">TimeSinceSuccessfulScan := 0</label>
 		</transition>
 		<transition>
 			<source ref="id8"/>
@@ -370,14 +371,18 @@ clock CardPayTimer;</declaration>
 		<transition>
 			<source ref="id33"/>
 			<target ref="id27"/>
-			<label kind="guard" x="-297" y="246">CardPayTimer &gt; 10000</label>
-			<nail x="-544" y="246"/>
-			<nail x="187" y="246"/>
+			<label kind="guard" x="-297" y="272">CardPayTimer &gt;= 10000</label>
+			<label kind="synchronisation" x="-297" y="306">PaymentDeclined!</label>
+			<label kind="assignment" x="-297" y="289">ErrStat:=24</label>
+			<nail x="-544" y="272"/>
+			<nail x="187" y="272"/>
 		</transition>
 		<transition>
 			<source ref="id32"/>
 			<target ref="id27"/>
-			<label kind="guard" x="-136" y="195">CardPayTimer &gt; 10000</label>
+			<label kind="guard" x="-136" y="195">CardPayTimer &gt;= 10000</label>
+			<label kind="synchronisation" x="-136" y="229">PaymentDeclined!</label>
+			<label kind="assignment" x="-136" y="212">ErrStat:=24</label>
 			<nail x="-289" y="195"/>
 			<nail x="170" y="195"/>
 		</transition>
@@ -438,6 +443,7 @@ CardPayTimer &lt; 10000</label>
 		<transition>
 			<source ref="id33"/>
 			<target ref="id32"/>
+			<label kind="guard" x="-501" y="-25">CardPayTimer &lt;  10000</label>
 		</transition>
 		<transition>
 			<source ref="id34"/>
@@ -867,7 +873,7 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>A[]((CardP.CardInserted and CardP.CardPayTimer &gt; 10000) imply CardP.PinCodeRecieved)</formula>
+			<formula>(CardP.CardInserted and CardP.CardPayTimer &gt;= 10000) --&gt; CardP.PaymentFailed</formula>
 			<comment></comment>
 		</query>
 		<query>
