@@ -98,6 +98,11 @@ A<> (Con.AgeVerification imply EL.Red) imply EL.Green
 /*
 
 */
+CardP.CardInserted and CardP.CardPayTimer > 10000 --> CardP.PaymentFailed
+
+/*
+
+*/
 //NO_QUERY
 
 /*

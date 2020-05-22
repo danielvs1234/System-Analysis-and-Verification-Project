@@ -341,7 +341,7 @@ clock SysTimer;</declaration>
 		<declaration>// Place local declarations here.
 
 
-clock PinTimer;</declaration>
+clock CardPayTimer;</declaration>
 		<location id="id27" x="170" y="119">
 			<name x="127" y="136">PaymentFailed</name>
 		</location>
@@ -354,19 +354,33 @@ clock PinTimer;</declaration>
 		<location id="id30" x="0" y="0">
 			<name x="-61" y="17">PinCodeAccepted</name>
 		</location>
-		<location id="id31" x="-289" y="119">
-			<name x="-340" y="136">PinCodeRejected</name>
+		<location id="id31" x="-357" y="119">
+			<name x="-408" y="136">PinCodeRejected</name>
 		</location>
 		<location id="id32" x="-289" y="0">
 			<name x="-348" y="-34">PinCodeRecieved</name>
 		</location>
 		<location id="id33" x="-544" y="0">
-			<name x="-586" y="18">CardInserted</name>
+			<name x="-646" y="17">CardInserted</name>
 		</location>
 		<location id="id34" x="-544" y="-170">
 			<name x="-586" y="-187">Idle</name>
 		</location>
 		<init ref="id34"/>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id27"/>
+			<label kind="guard" x="-297" y="246">CardPayTimer &gt; 10000</label>
+			<nail x="-544" y="246"/>
+			<nail x="187" y="246"/>
+		</transition>
+		<transition>
+			<source ref="id32"/>
+			<target ref="id27"/>
+			<label kind="guard" x="-136" y="195">CardPayTimer &gt; 10000</label>
+			<nail x="-289" y="195"/>
+			<nail x="170" y="195"/>
+		</transition>
 		<transition>
 			<source ref="id27"/>
 			<target ref="id34"/>
@@ -391,12 +405,14 @@ clock PinTimer;</declaration>
 		<transition>
 			<source ref="id31"/>
 			<target ref="id33"/>
-			<label kind="guard" x="-501" y="68">ErrCardStat &lt; 3</label>
+			<label kind="guard" x="-518" y="110">ErrCardStat &lt; 3</label>
+			<label kind="assignment" x="-518" y="93">CardPayTimer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id31"/>
 			<target ref="id28"/>
-			<label kind="guard" x="-204" y="136">ErrCardStat &gt;= 3</label>
+			<label kind="guard" x="-204" y="136">ErrCardStat &gt;= 3 &amp;&amp;
+CardPayTimer &lt; 10000</label>
 			<label kind="assignment" x="-204" y="119">ErrCardStat:=0</label>
 		</transition>
 		<transition>
@@ -411,12 +427,13 @@ clock PinTimer;</declaration>
 		<transition>
 			<source ref="id32"/>
 			<target ref="id30"/>
-			<label kind="assignment" x="-221" y="0">ErrCardStat := 0</label>
+			<label kind="guard" x="-212" y="8">CardPayTimer &lt; 10000</label>
+			<label kind="assignment" x="-212" y="25">ErrCardStat := 0</label>
 		</transition>
 		<transition>
 			<source ref="id32"/>
 			<target ref="id31"/>
-			<label kind="assignment" x="-280" y="51">ErrCardStat++</label>
+			<label kind="assignment" x="-416" y="42">ErrCardStat++</label>
 		</transition>
 		<transition>
 			<source ref="id33"/>
@@ -425,8 +442,8 @@ clock PinTimer;</declaration>
 		<transition>
 			<source ref="id34"/>
 			<target ref="id33"/>
-			<label kind="synchronisation" x="-535" y="-85">CardPaymentSelected?</label>
-			<label kind="assignment" x="-535" y="-102">PinTimer := 0</label>
+			<label kind="synchronisation" x="-535" y="-59">CardPaymentSelected?</label>
+			<label kind="assignment" x="-535" y="-102">CardPayTimer := 0</label>
 		</transition>
 	</template>
 	<template>
@@ -829,7 +846,7 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 			<comment>If Error lamp is on the interactive screen should be reset </comment>
 		</query>
 		<query>
-			<formula>A&lt;&gt; (Con.ItemIsScanned imply W.Error) imply  not Con.ItemIsScanned</formula>
+			<formula>A&lt;&gt; ((Con.ItemIsScanned imply W.Error) imply not Con.ItemIsScanned)</formula>
 			<comment>It should not be possible to scan a new item if the weight returns an error
 </comment>
 		</query>
@@ -847,6 +864,10 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 		</query>
 		<query>
 			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[]((CardP.CardInserted and CardP.CardPayTimer &gt; 10000) imply CardP.PinCodeRecieved)</formula>
 			<comment></comment>
 		</query>
 		<query>
