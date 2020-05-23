@@ -96,11 +96,41 @@ A<> (Con.AgeVerification imply EL.Red) imply EL.Green
 //NO_QUERY
 
 /*
-If card is inserted and the PayTimer is above or equal to 10000 the transaction should be failed
+2. If  card  has  not  been  accepted  or  declined  within  10  seconds  from  beinginserted give the customer a notice something went wrong and should try again.
+*/
+A[] (CardP.PaymentTimeout imply CardP.CardPayTimer >= 10000)
+
+/*
+1. If no actions are performed by the customer within 30 seconds after initiatingthe shopping by scanning an item. The self-service register should ask thecustomer if they want to continue while also turn on the error lamp.
+*/
+A[] (Con.IdleTimeout && Con.LastActionTimer >= 30000) imply EL.Red
+
+/*
+2. If card is inserted and the PayTimer is above or equal to 10000 the transaction should be failed
 */
 A<> (CardP.CardInserted and CardP.CardPayTimer >= 10000) imply CardP.PaymentFailed
 
 /*
-If and item is scanned but not placed on the weight within 5 seconds, the errorlamp should register and show red
+3. If an item is scanned but not placed on the weight within 5 seconds the self-service register should notify the customer to place the item on the weight while also turn on the error lamp.
 */
 A<> (Con.ItemIsScanned && Con.ItemPlacedTimer >= 5000) imply EL.Red
+
+/*
+4. The error lamp should be turned on within 1 second of detecting an error
+*/
+A<> (ErrStat > 0 && ErrorResponseTimer < 1000)imply EL.Red
+
+/*
+5 After paying the self-service register should be ready for the new customer within 10 seconds
+*/
+E[] (Con.PaymentCompleted && Con.PaymentCompletedTimer <= 10000) imply Con.Idle
+
+/*
+6 The customer should be able to start payment at latest 1 second after last item successfully scanned
+*/
+A<> Con.Shopping imply Con.PaymentChosen && Con.TimeSinceLastAction < 1000
+
+/*
+After paying the self-service register should be ready for the new customer within 10 seconds
+*/
+//NO_QUERY
