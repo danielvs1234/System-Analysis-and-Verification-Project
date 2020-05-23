@@ -936,6 +936,14 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 			<comment>2. If  card  has  not  been  accepted  or  declined  within  10  seconds  from  beinginserted give the customer a notice something went wrong and should try again.</comment>
 		</query>
 		<query>
+			<formula>A&lt;&gt; CardP.PaymentCancelled imply CardP.CardPayTimer &lt; 10000</formula>
+			<comment>2. If  card  has  not  been  accepted  or  declined  within  10  seconds  from  beinginserted give the customer a notice something went wrong and should try again.</comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; CardP.PinCodeAccepted imply CardP.CardPayTimer &lt; 10000</formula>
+			<comment>2. If  card  has  not  been  accepted  or  declined  within  10  seconds  from  beinginserted give the customer a notice something went wrong and should try again.</comment>
+		</query>
+		<query>
 			<formula>A[] (Con.IdleTimeout &amp;&amp; Con.LastActionTimer &gt;= 30000) imply EL.Red</formula>
 			<comment>1. If no actions are performed by the customer within 30 seconds after initiatingthe shopping by scanning an item. The self-service register should ask thecustomer if they want to continue while also turn on the error lamp.</comment>
 		</query>
@@ -954,10 +962,6 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 		<query>
 			<formula>E[] (Con.PaymentCompleted &amp;&amp; Con.PaymentCompletedTimer &lt;= 10000) imply Con.Idle</formula>
 			<comment>5 After paying the self-service register should be ready for the new customer within 10 seconds</comment>
-		</query>
-		<query>
-			<formula>A[]((CardP.PaymentSuccesful and CardP.CardPayTimer &lt; 10000) imply ErrStat != 24)</formula>
-			<comment></comment>
 		</query>
 		<query>
 			<formula>A&lt;&gt; Con.Shopping imply Con.PaymentChosen &amp;&amp; Con.TimeSinceLastAction &lt; 1000</formula>
