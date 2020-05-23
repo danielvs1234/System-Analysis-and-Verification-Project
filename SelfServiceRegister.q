@@ -76,11 +76,6 @@ It should not be possible to scan a new item if the weight returns an error
 A<> ((Con.ItemIsScanned imply W.Error) imply not Con.ItemIsScanned)
 
 /*
-While a card payment is happening, another payment of cash\/coupon is not possible
-*/
-A<> Con.CardPayment imply (not Con.CashPayment and not Con.CouponPayment)
-
-/*
 If an error occurs, the shopper should not be able to continue before a reset has happened
 */
 A<> ErrStat > 0 imply (EL.Red and (HS.Idle and AS.Idle))
@@ -89,11 +84,6 @@ A<> ErrStat > 0 imply (EL.Red and (HS.Idle and AS.Idle))
 If scanning an age restricted item the age error should be present and in need of a reset
 */
 A<> (Con.AgeVerification imply EL.Red) imply EL.Green
-
-/*
-
-*/
-//NO_QUERY
 
 /*
 2. If  card  has  not  been  accepted  or  declined  within  10  seconds  from  beinginserted give the customer a notice something went wrong and should try again.
