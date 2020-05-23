@@ -357,8 +357,8 @@ ErrorResponseTimer := 0</label>
 
 
 clock CardPayTimer;</declaration>
-		<location id="id27" x="170" y="119">
-			<name x="127" y="136">PaymentFailed</name>
+		<location id="id27" x="204" y="119">
+			<name x="221" y="127">PaymentFailed</name>
 		</location>
 		<location id="id28" x="-8" y="119">
 			<name x="-68" y="136">PaymentCancelled</name>
@@ -376,7 +376,7 @@ clock CardPayTimer;</declaration>
 			<name x="-348" y="-34">PinCodeRecieved</name>
 		</location>
 		<location id="id33" x="-544" y="0">
-			<name x="-646" y="17">CardInserted</name>
+			<name x="-637" y="-34">CardInserted</name>
 		</location>
 		<location id="id34" x="-544" y="-170">
 			<name x="-586" y="-187">Idle</name>
@@ -397,16 +397,16 @@ clock CardPayTimer;</declaration>
 			<source ref="id36"/>
 			<target ref="id27"/>
 			<label kind="synchronisation" x="-67" y="280">PaymentDeclined!</label>
-			<label kind="assignment" x="-67" y="297">ErrStat:=24,
+			<label kind="assignment" x="-68" y="297">ErrStat:=24,
 ErrorResponseTimer := 0</label>
-			<nail x="170" y="297"/>
+			<nail x="204" y="297"/>
 		</transition>
 		<transition>
 			<source ref="id33"/>
 			<target ref="id36"/>
-			<label kind="guard" x="-535" y="382">CardPayTimer &gt;= 10000</label>
-			<nail x="-544" y="408"/>
-			<nail x="-357" y="408"/>
+			<label kind="guard" x="-535" y="314">CardPayTimer &gt;= 10000</label>
+			<nail x="-544" y="340"/>
+			<nail x="-170" y="340"/>
 		</transition>
 		<transition>
 			<source ref="id32"/>
@@ -425,10 +425,10 @@ ErrorResponseTimer := 0</label>
 		<transition>
 			<source ref="id30"/>
 			<target ref="id27"/>
-			<label kind="synchronisation" x="93" y="8">PaymentDeclined!</label>
-			<label kind="assignment" x="93" y="25">ErrStat:=25,
+			<label kind="synchronisation" x="67" y="-59">PaymentDeclined!</label>
+			<label kind="assignment" x="67" y="-42">ErrStat:=25,
 ErrorResponseTimer := 0</label>
-			<nail x="170" y="0"/>
+			<nail x="204" y="0"/>
 		</transition>
 		<transition>
 			<source ref="id28"/>
@@ -446,9 +446,8 @@ ErrorResponseTimer := 0</label>
 		<transition>
 			<source ref="id31"/>
 			<target ref="id28"/>
-			<label kind="guard" x="-204" y="136">ErrCardStat &gt;= 3 &amp;&amp;
+			<label kind="guard" x="-229" y="76">ErrCardStat &gt;= 3 &amp;&amp;
 CardPayTimer &lt; 10000</label>
-			<label kind="assignment" x="-204" y="119">ErrCardStat:=0</label>
 		</transition>
 		<transition>
 			<source ref="id29"/>
@@ -457,13 +456,12 @@ CardPayTimer &lt; 10000</label>
 		<transition>
 			<source ref="id30"/>
 			<target ref="id29"/>
-			<label kind="synchronisation" x="8" y="-85">PaymentAccepted!</label>
+			<label kind="synchronisation" x="8" y="-127">PaymentAccepted!</label>
 		</transition>
 		<transition>
 			<source ref="id32"/>
 			<target ref="id30"/>
-			<label kind="guard" x="-212" y="8">CardPayTimer &lt; 10000</label>
-			<label kind="assignment" x="-212" y="25">ErrCardStat := 0</label>
+			<label kind="guard" x="-229" y="-25">CardPayTimer &lt; 10000</label>
 		</transition>
 		<transition>
 			<source ref="id32"/>
@@ -478,7 +476,7 @@ CardPayTimer &lt; 10000</label>
 			<source ref="id34"/>
 			<target ref="id33"/>
 			<label kind="synchronisation" x="-535" y="-85">CardPaymentSelected?</label>
-			<label kind="assignment" x="-535" y="-102">CardPayTimer := 0</label>
+			<label kind="assignment" x="-535" y="-102">CardPayTimer := 0, ErrCardStat := 0</label>
 		</transition>
 	</template>
 	<template>
@@ -912,7 +910,7 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 			<comment>If scanning an age restricted item the age error should be present and in need of a reset</comment>
 		</query>
 		<query>
-			<formula></formula>
+			<formula>A[](CardP.PaymentTimeout imply CardP.CardPayTimer &gt;= 10000)</formula>
 			<comment></comment>
 		</query>
 		<query>
