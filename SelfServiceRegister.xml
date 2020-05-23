@@ -286,7 +286,7 @@ LastActionTimer := 0</label>
 		<transition>
 			<source ref="id26"/>
 			<target ref="id15"/>
-			<label kind="synchronisation" x="-2822" y="-68">PaymentDeclined?</label>
+			<label kind="synchronisation" x="-2830" y="-76">PaymentDeclined?</label>
 		</transition>
 		<transition>
 			<source ref="id25"/>
@@ -690,7 +690,7 @@ ErrorResponseTimer := 0</label>
 			<source ref="id53"/>
 			<target ref="id52"/>
 			<label kind="synchronisation" x="-238" y="85">UnrecognizedWeight!</label>
-			<label kind="assignment" x="-238" y="102">ErrStat := 1,
+			<label kind="assignment" x="-238" y="102">ErrStat := 2,
 ErrorResponseTimer := 0</label>
 		</transition>
 		<transition>
@@ -924,20 +924,12 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 </comment>
 		</query>
 		<query>
-			<formula>A&lt;&gt; Con.CardPayment imply (not Con.CashPayment and not Con.CouponPayment)</formula>
-			<comment>While a card payment is happening, another payment of cash/coupon is not possible</comment>
-		</query>
-		<query>
 			<formula>A&lt;&gt; ErrStat &gt; 0 imply (EL.Red and (HS.Idle and AS.Idle))</formula>
 			<comment>If an error occurs, the shopper should not be able to continue before a reset has happened</comment>
 		</query>
 		<query>
 			<formula>A&lt;&gt; (Con.AgeVerification imply EL.Red) imply EL.Green</formula>
 			<comment>If scanning an age restricted item the age error should be present and in need of a reset</comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
 		</query>
 		<query>
 			<formula>A[] (CardP.PaymentTimeout imply CardP.CardPayTimer &gt;= 10000)</formula>
@@ -964,12 +956,12 @@ system Int, Con, CardP, CashP, CoupP, BackP, W, EL, AS, HS, RP;</system>
 			<comment>5 After paying the self-service register should be ready for the new customer within 10 seconds</comment>
 		</query>
 		<query>
-			<formula>A&lt;&gt; Con.Shopping imply Con.PaymentChosen &amp;&amp; Con.TimeSinceLastAction &lt; 1000</formula>
-			<comment>6 The customer should be able to start payment at latest 1 second after last item successfully scanned</comment>
+			<formula>A[]((CardP.PaymentSuccesful and CardP.CardPayTimer &lt; 10000) imply ErrStat != 24)</formula>
+			<comment></comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment>After paying the self-service register should be ready for the new customer within 10 seconds</comment>
+			<formula>A&lt;&gt; Con.Shopping imply Con.PaymentChosen &amp;&amp; Con.TimeSinceLastAction &lt; 1000</formula>
+			<comment>6 The customer should be able to start payment at latest 1 second after last item successfully scanned</comment>
 		</query>
 	</queries>
 </nta>
